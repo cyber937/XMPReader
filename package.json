@@ -1,0 +1,22 @@
+{
+  "name": "xmpreader",
+  "version": "0.1.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^5.0.8"
+  },
+  "dependencies": {
+    "bootstrap": "^4.3.1",
+    "jquery": "^3.3.1",
+    "popper.js": "^1.14.4",
+    "xml-js": "^1.6.11",
+    "xmldom": "^0.1.27"
+  }
+}

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>MetaReader</title>
+
+    <link
+      rel="stylesheet"
+      href="./contents/bootstrap/4.3.1/css/bootstrap.min.css"
+    />
+    <script>
+      let $ = require("jquery");
+    </script>
+    <script>
+      require("popper.js");
+    </script>
+    <script>
+      require("bootstrap");
+    </script>
+  </head>
+  <body>
+    <button type="button" class="btn btn-primary" id="select-directory">
+      Open File
+    </button>
+    <br><span class="demo-response" id="selected-file"></span></br>
+
+    <table class="table table-sm" id="attribute-table">
+      <tbody>
+        <tr>
+          <th>Height</th>
+          <td></td>
+        </tr>
+        <tr>
+          <th>Width</th>
+          <td></td>
+        </tr>
+        <tr>
+          <th>Color Space</th>
+          <td></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <script type="text/javascript">
+      require("./index");
+    </script>
+  </body>
+</html>
