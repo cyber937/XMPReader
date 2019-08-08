@@ -1,16 +1,19 @@
 {
   "name": "xmpreader",
   "version": "0.1.0",
-  "description": "",
   "main": "main.js",
   "scripts": {
     "start": "electron ."
+  },
+  "config": {
+    "forge": "./forge.config.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "electron": "^5.0.8"
+    "electron": "^5.0.8",
+    "electron-forge": "^5.2.4"
   },
   "dependencies": {
     "bootstrap": "^4.3.1",

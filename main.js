@@ -25,7 +25,7 @@ function createWindow() {
   win.loadFile("index.html");
 
   // Open the DevTools.
-  win.webContents.openDevTools();
+  //win.webContents.openDevTools();
   // Emitted when the window is closed.
   win.on("closed", () => {
     win = null;
@@ -49,12 +49,11 @@ app.on("activate", () => {
 ipcMain.on("open-file-dialog", event => {
   dialog.showOpenDialog(
     {
+      filters: [{ name: "Images", extensions: ["psd", "ai"] }],
       properties: ["openFile", "openDirectory"]
     },
     files => {
       if (files) {
-        //console.log(files);
-
         event.sender.send("selected-directory", files);
 
         // Get XMP Data from xmpaddon.
@@ -67,19 +66,20 @@ ipcMain.on("open-file-dialog", event => {
         const rdfElement = doc.getElementsByTagName("rdf:RDF")[0];
         const result = new serializer().serializeToString(rdfElement);
 
+        //console.log(result);
         // Convert JSON Data from XML
         const jsonData = convert.xml2json(result, { compact: true, spaces: 4 });
 
-        //console.log(jsonData);
+        console.log(jsonData);
 
         // Creat JSON Object
         jsonObj = JSON.parse(jsonData);
 
         // Find Creator Tool Informaiton
         const creatorToolInfo =
-          jsonObj["rdf:RDF"]["rdf:Description"]["_attributes"][
-            "xmp:CreatorTool"
-          ];
+          jsonObj["rdf:RDF"]["rdf:Description"]["xmp:CreatorTool"]["_text"];
+
+        console.log(creatorToolInfo);
 
         var documentWidth;
         var documentHeight;
@@ -88,23 +88,70 @@ ipcMain.on("open-file-dialog", event => {
         var propertyDic = {};
 
         if (creatorToolInfo.includes("Photoshop")) {
-          //console.log("This is Photoshop File.");
+          console.log("This is Photoshop File.");
+          if ("exif:PixelXDimension" in jsonObj["rdf:RDF"]["rdf:Description"]) {
+            propertyDic["width"] =
+              jsonObj["rdf:RDF"]["rdf:Description"]["exif:PixelXDimension"][
+                "_text"
+              ] + " px";
+          } else {
+            propertyDic["width"] = "---";
+          }
 
-          propertyDic["width"] =
-            jsonObj["rdf:RDF"]["rdf:Description"]["_attributes"][
-              "exif:PixelXDimension"
-            ];
-          propertyDic["height"] =
-            jsonObj["rdf:RDF"]["rdf:Description"]["_attributes"][
-              "exif:PixelYDimension"
-            ];
-          propertyDic["colorProfile"] =
-            jsonObj["rdf:RDF"]["rdf:Description"]["_attributes"][
-              "photoshop:ICCProfile"
-            ];
+          if ("exif:PixelYDimension" in jsonObj["rdf:RDF"]["rdf:Description"]) {
+            propertyDic["height"] =
+              jsonObj["rdf:RDF"]["rdf:Description"]["exif:PixelYDimension"][
+                "_text"
+              ] + " px";
+          } else {
+            propertyDic["height"] = "---";
+          }
+
+          if ("photoshop:ICCProfile" in jsonObj["rdf:RDF"]["rdf:Description"]) {
+            propertyDic["colorProfile"] =
+              jsonObj["rdf:RDF"]["rdf:Description"]["photoshop:ICCProfile"][
+                "_text"
+              ];
+          } else {
+            propertyDic["colorProfile"] = "---";
+          }
+
           event.sender.send("attribute-table", propertyDic);
         } else if (creatorToolInfo.includes("Illustrator")) {
-          console.log("This is Illustrator File.");
+          console.log("This is illustrator File.");
+
+          var unit = "";
+          if ("xmpTPg:MaxPageSize" in jsonObj["rdf:RDF"]["rdf:Description"]) {
+            unit = propertyDic["colorProfile"] =
+              jsonObj["rdf:RDF"]["rdf:Description"]["xmpTPg:MaxPageSize"][
+                "stDim:unit"
+              ]["_text"];
+          }
+
+          if ("xmpTPg:MaxPageSize" in jsonObj["rdf:RDF"]["rdf:Description"]) {
+            propertyDic["width"] =
+              jsonObj["rdf:RDF"]["rdf:Description"]["xmpTPg:MaxPageSize"][
+                "stDim:w"
+              ]["_text"] +
+              " " +
+              unit;
+          } else {
+            propertyDic["width"] = "---";
+          }
+
+          if ("xmpTPg:MaxPageSize" in jsonObj["rdf:RDF"]["rdf:Description"]) {
+            propertyDic["height"] =
+              jsonObj["rdf:RDF"]["rdf:Description"]["xmpTPg:MaxPageSize"][
+                "stDim:h"
+              ]["_text"] +
+              " " +
+              unit;
+          } else {
+            propertyDic["height"] = "---";
+          }
+
+          propertyDic["colorProfile"] = "---";
+          event.sender.send("attribute-table", propertyDic);
         }
       }
     }

@@ -20,6 +20,26 @@ void SDKVersion(const v8::FunctionCallbackInfo<v8::Value> &args)
     args.GetReturnValue().Set(message);
 }
 
+SXMPMeta createXMPFromString(string xmp)
+{
+    SXMPMeta meta;
+
+    const char *xmpBuffer = xmp.c_str();
+
+    // Loop over the rdf string and create the XMP object
+    // 10 characters at a time
+    int i;
+    for (i = 0; i < (long)strlen(xmpBuffer) - 10; i += 10)
+    {
+        meta.ParseFromBuffer(&xmpBuffer[i], 10, kXMP_ParseMoreBuffers);
+    }
+
+    // The last call has no kXMP_ParseMoreBuffers options, signifying
+    // this is the last input buffer
+    meta.ParseFromBuffer(&xmpBuffer[i], (XMP_StringLen)strlen(xmpBuffer) - i);
+    return meta;
+}
+
 void XMPRead(const v8::FunctionCallbackInfo<v8::Value> &args)
 {
 
@@ -28,7 +48,16 @@ void XMPRead(const v8::FunctionCallbackInfo<v8::Value> &args)
     if (!SXMPMeta::Initialize())
     {
         cout << "Could not initialize toolkit!" << endl;
-        return;
+    }
+    XMP_OptionBits options = 0;
+
+#if UNIX_ENV
+    options |= kXMPFiles_ServerMode;
+#endif
+
+    if (!SXMPFiles::Initialize(options))
+    {
+        cout << "Could not initialize SXMPFiles." << endl;
     }
 
     XMP_OptionBits opts = kXMPFiles_OpenForRead | kXMPFiles_OpenUseSmartHandler;
@@ -38,7 +67,7 @@ void XMPRead(const v8::FunctionCallbackInfo<v8::Value> &args)
 
     if (!args[0]->IsString())
     {
-        cout << "Could not initialize toolkit!" << endl;
+        //cout << "Could not initialize toolkit!" << endl;
         return;
     }
 
@@ -64,7 +93,7 @@ void XMPRead(const v8::FunctionCallbackInfo<v8::Value> &args)
 
         myFile.CloseFile();
 
-        XMP_OptionBits outOpts = kXMP_UseCompactFormat;
+        XMP_OptionBits outOpts = kXMP_OmitPacketWrapper;
 
         meta.SerializeToBuffer(&rdf, outOpts);
 
