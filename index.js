@@ -13,12 +13,15 @@ ipcRenderer.on("selected-directory", (event, path) => {
 
 ipcRenderer.on("attribute-table", (event, propertyDic) => {
   document.getElementById("attribute-table").rows[0].cells[1].innerHTML = `${
-    propertyDic["height"]
+    propertyDic["colorProfile"]
   }`;
   document.getElementById("attribute-table").rows[1].cells[1].innerHTML = `${
-    propertyDic["width"]
+    propertyDic["height"]
   }`;
   document.getElementById("attribute-table").rows[2].cells[1].innerHTML = `${
-    propertyDic["colorProfile"]
+    propertyDic["width"]
+  }`;
+  document.getElementById("attribute-table").rows[3].cells[1].innerHTML = `${
+    propertyDic["dpi"]
   }`;
 });
