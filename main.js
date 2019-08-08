@@ -66,93 +66,91 @@ ipcMain.on("open-file-dialog", event => {
         const rdfElement = doc.getElementsByTagName("rdf:RDF")[0];
         const result = new serializer().serializeToString(rdfElement);
 
-        //console.log(result);
-        // Convert JSON Data from XML
-        const jsonData = convert.xml2json(result, { compact: true, spaces: 4 });
-
-        console.log(jsonData);
-
-        // Creat JSON Object
-        jsonObj = JSON.parse(jsonData);
+        // Convert JSON String from XML
+        const jsonObj = convert.xml2js(result, {
+          compact: true,
+          spaces: 4
+        });
+        const metaObj = jsonObj["rdf:RDF"]["rdf:Description"];
 
         // Find Creator Tool Informaiton
-        const creatorToolInfo =
-          jsonObj["rdf:RDF"]["rdf:Description"]["xmp:CreatorTool"]["_text"];
+        const creatorToolInfo = metaObj["xmp:CreatorTool"]["_text"];
 
         console.log(creatorToolInfo);
 
-        var documentWidth;
-        var documentHeight;
-        var colorProfile;
-
         var propertyDic = {};
+
+        // Find Photoshop file or Illustrator file
 
         if (creatorToolInfo.includes("Photoshop")) {
           console.log("This is Photoshop File.");
-          if ("exif:PixelXDimension" in jsonObj["rdf:RDF"]["rdf:Description"]) {
-            propertyDic["width"] =
-              jsonObj["rdf:RDF"]["rdf:Description"]["exif:PixelXDimension"][
-                "_text"
-              ] + " px";
-          } else {
-            propertyDic["width"] = "---";
-          }
 
-          if ("exif:PixelYDimension" in jsonObj["rdf:RDF"]["rdf:Description"]) {
-            propertyDic["height"] =
-              jsonObj["rdf:RDF"]["rdf:Description"]["exif:PixelYDimension"][
-                "_text"
-              ] + " px";
-          } else {
-            propertyDic["height"] = "---";
-          }
+          // Color Profile
 
-          if ("photoshop:ICCProfile" in jsonObj["rdf:RDF"]["rdf:Description"]) {
+          if ("photoshop:ICCProfile" in metaObj) {
             propertyDic["colorProfile"] =
-              jsonObj["rdf:RDF"]["rdf:Description"]["photoshop:ICCProfile"][
-                "_text"
-              ];
+              metaObj["photoshop:ICCProfile"]["_text"];
           } else {
             propertyDic["colorProfile"] = "---";
           }
 
-          event.sender.send("attribute-table", propertyDic);
-        } else if (creatorToolInfo.includes("Illustrator")) {
-          console.log("This is illustrator File.");
+          // Document Width
 
-          var unit = "";
-          if ("xmpTPg:MaxPageSize" in jsonObj["rdf:RDF"]["rdf:Description"]) {
-            unit = propertyDic["colorProfile"] =
-              jsonObj["rdf:RDF"]["rdf:Description"]["xmpTPg:MaxPageSize"][
-                "stDim:unit"
-              ]["_text"];
-          }
-
-          if ("xmpTPg:MaxPageSize" in jsonObj["rdf:RDF"]["rdf:Description"]) {
+          if ("exif:PixelXDimension" in metaObj) {
             propertyDic["width"] =
-              jsonObj["rdf:RDF"]["rdf:Description"]["xmpTPg:MaxPageSize"][
-                "stDim:w"
-              ]["_text"] +
-              " " +
-              unit;
+              metaObj["exif:PixelXDimension"]["_text"] + " px";
           } else {
             propertyDic["width"] = "---";
           }
 
-          if ("xmpTPg:MaxPageSize" in jsonObj["rdf:RDF"]["rdf:Description"]) {
+          // Document Height
+
+          if ("exif:PixelYDimension" in metaObj) {
             propertyDic["height"] =
-              jsonObj["rdf:RDF"]["rdf:Description"]["xmpTPg:MaxPageSize"][
-                "stDim:h"
-              ]["_text"] +
-              " " +
-              unit;
+              metaObj["exif:PixelYDimension"]["_text"] + " px";
+          } else {
+            propertyDic["height"] = "---";
+          }
+
+          // DPI
+
+          if ("tiff:XResolution" in metaObj) {
+            const resolution = metaObj["tiff:XResolution"]["_text"];
+            const resolutionArr = resolution.split("/");
+            const resolutionNumFloat = parseFloat(resolutionArr[0]);
+            const resolutionDenFloat = parseFloat(resolutionArr[1]);
+            const dpiFloat = resolutionNumFloat / resolutionDenFloat;
+            propertyDic["dpi"] = dpiFloat.toString();
+          } else {
+            propertyDic["dpi"] = "---";
+          }
+        } else if (creatorToolInfo.includes("Illustrator")) {
+          console.log("This is illustrator File.");
+
+          var unit = "";
+          if ("xmpTPg:MaxPageSize" in metaObj) {
+            unit = propertyDic["colorProfile"] =
+              metaObj["xmpTPg:MaxPageSize"]["stDim:unit"]["_text"];
+          }
+
+          if ("xmpTPg:MaxPageSize" in metaObj) {
+            propertyDic["width"] =
+              metaObj["xmpTPg:MaxPageSize"]["stDim:w"]["_text"] + " " + unit;
+          } else {
+            propertyDic["width"] = "---";
+          }
+
+          if ("xmpTPg:MaxPageSize" in metaObj) {
+            propertyDic["height"] =
+              metaObj["xmpTPg:MaxPageSize"]["stDim:h"]["_text"] + " " + unit;
           } else {
             propertyDic["height"] = "---";
           }
 
           propertyDic["colorProfile"] = "---";
-          event.sender.send("attribute-table", propertyDic);
+          propertyDic["dpi"] = "---";
         }
+        event.sender.send("attribute-table", propertyDic);
       }
     }
   );
