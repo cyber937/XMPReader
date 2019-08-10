@@ -1,13 +1,11 @@
 const { app, BrowserWindow } = require("electron");
-
 const { ipcMain, dialog } = require("electron");
-
 const dom = require("xmldom").DOMParser;
 const serializer = require("xmldom").XMLSerializer;
-
 const xmpaddon = require("./xmpaddon/build/Release/xmpaddon");
-
 var convert = require("xml-js");
+var PSD = require("psd");
+var psdparse = require("./src/PSDParse");
 
 let win;
 
@@ -55,9 +53,10 @@ ipcMain.on("open-file-dialog", event => {
     files => {
       if (files) {
         event.sender.send("selected-directory", files);
+        const filepath = files[0];
 
         // Get XMP Data from xmpaddon.
-        const xmpString = xmpaddon.xmpRead(files[0]);
+        const xmpString = xmpaddon.xmpRead(filepath);
 
         // Parse from XMP String
         const doc = new dom().parseFromString(xmpString);
@@ -79,6 +78,10 @@ ipcMain.on("open-file-dialog", event => {
         console.log(creatorToolInfo);
 
         var propertyDic = {};
+
+        // Name
+        var filename = filepath.replace(/^.*[\\\/]/, "");
+        propertyDic["name"] = filename;
 
         // Find Photoshop file or Illustrator file
 
@@ -124,6 +127,20 @@ ipcMain.on("open-file-dialog", event => {
           } else {
             propertyDic["dpi"] = "---";
           }
+
+          // Layers
+
+          var psd = PSD.fromFile(filepath);
+          psd.parse();
+
+          var treelist =
+            '<ul class="fa-ul">' +
+            psdparse.createTreelist(psd.tree()) +
+            "</ul>";
+          propertyDic["layer"] = treelist;
+
+          // Fonts
+          propertyDic["fonts"] = psdparse.ctreatTextlist(psd.tree());
         } else if (creatorToolInfo.includes("Illustrator")) {
           console.log("This is illustrator File.");
 
@@ -149,6 +166,8 @@ ipcMain.on("open-file-dialog", event => {
 
           propertyDic["colorProfile"] = "---";
           propertyDic["dpi"] = "---";
+          propertyDic["layer"] = "---";
+          propertyDic["fonts"] = "---";
         }
         event.sender.send("attribute-table", propertyDic);
       }
