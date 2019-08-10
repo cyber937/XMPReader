@@ -24,4 +24,13 @@ ipcRenderer.on("attribute-table", (event, propertyDic) => {
   document.getElementById("attribute-table").rows[3].cells[1].innerHTML = `${
     propertyDic["dpi"]
   }`;
+  document.getElementById("attribute-table").rows[4].cells[1].innerHTML = `${
+    propertyDic["layer"]
+  }`;
+  document.getElementById("attribute-table").rows[5].cells[1].innerHTML = `${
+    propertyDic["name"]
+  }`;
+  document.getElementById("attribute-table").rows[6].cells[1].innerHTML = `${
+    propertyDic["fonts"]
+  }`;
 });
