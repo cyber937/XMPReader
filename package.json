@@ -1,6 +1,6 @@
 {
   "name": "xmpreader",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "main": "main.js",
   "scripts": {
     "start": "electron ."
@@ -16,6 +16,8 @@
     "electron-forge": "^5.2.4"
   },
   "dependencies": {
+    "@electron-forge/maker-dmg": "^6.0.0-beta.43",
+    "@electron-forge/maker-zip": "^6.0.0-beta.43",
     "bootstrap": "^4.3.1",
     "jquery": "^3.3.1",
     "popper.js": "^1.14.4",
