@@ -1,0 +1,12 @@
+{
+  "name": "padparseraddon",
+  "scripts": {
+    "install": "node-gyp rebuild --target=5.0.8 --arch=x64 --dist-url=https://atom.io/download/electron"
+  },
+  "gypfile": true,
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}

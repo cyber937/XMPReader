@@ -2,6 +2,7 @@ const { app, BrowserWindow } = require("electron");
 const { ipcMain, dialog } = require("electron");
 const dom = require("xmldom").DOMParser;
 const serializer = require("xmldom").XMLSerializer;
+const PSDParserAddon = require("./PSDParserAddon/build/Release/PSDParserAddon");
 const xmpaddon = require("./xmpaddon/build/Release/xmpaddon");
 var convert = require("xml-js");
 var PSD = require("psd");
@@ -23,7 +24,7 @@ function createWindow() {
   win.loadFile("index.html");
 
   // Open the DevTools.
-  //win.webContents.openDevTools();
+  win.webContents.openDevTools();
   // Emitted when the window is closed.
   win.on("closed", () => {
     win = null;
@@ -130,6 +131,10 @@ ipcMain.on("open-file-dialog", event => {
 
           // Layers
 
+          const psdJSONString = PSDParserAddon.readPSD(filepath);
+
+          console.log(psdJSONString);
+
           var psd = PSD.fromFile(filepath);
           psd.parse();
 
@@ -137,6 +142,9 @@ ipcMain.on("open-file-dialog", event => {
             '<ul class="fa-ul">' +
             psdparse.createTreelist(psd.tree()) +
             "</ul>";
+
+          console.log(treelist);
+
           propertyDic["layer"] = treelist;
 
           // Fonts
