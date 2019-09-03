@@ -4,9 +4,9 @@
         "target_name": "PSDParserAddon",
         "sources": [ "PSDParserAddon.cc"],
         "include_dirs" : [
-            "/Users/kiyoshi/Documents/Projects/OriginStudios/XMPReader_Dev/PSDParserSDK64"
+            "PSDParser/PSDParser/include"
         ],
-        "libraries": ["/Users/kiyoshi/Library/Developer/Xcode/DerivedData/PSDParserSDK64-gwuburpncbhqvvdoqkqsdkoofhae/Build/Products/Debug/libPSDParserSDK64.a"],
+        "libraries": ["../PSDParser/Build/Products/Debug/libPSDParserStatic.a"],
         "xcode_settings": {
             "OTHER_CPLUSPLUSFLAGS" : [ "-std=c++11", "-stdlib=libc++" ],
             "OTHER_LDFLAGS": [
