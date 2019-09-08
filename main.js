@@ -24,7 +24,7 @@ function createWindow() {
   win.loadFile("index.html");
 
   // Open the DevTools.
-  win.webContents.openDevTools();
+  //win.webContents.openDevTools();
   // Emitted when the window is closed.
   win.on("closed", () => {
     win = null;
@@ -48,7 +48,7 @@ app.on("activate", () => {
 ipcMain.on("open-file-dialog", event => {
   dialog.showOpenDialog(
     {
-      filters: [{ name: "Images", extensions: ["psd", "ai"] }],
+      filters: [{ name: "Images", extensions: ["psd", "psb", "ai"] }],
       properties: ["openFile", "openDirectory"]
     },
     files => {
@@ -132,23 +132,23 @@ ipcMain.on("open-file-dialog", event => {
           // Layers
 
           const psdJSONString = PSDParserAddon.readPSD(filepath);
+          var obj = JSON.parse(psdJSONString);
+          var layers = obj["layers"];
 
-          console.log(psdJSONString);
+          var treelistNew =
+            '<ul class="fa-ul">' +
+            psdparse.createTreelistFromJSONObj(layers) +
+            "</ul>";
 
           var psd = PSD.fromFile(filepath);
           psd.parse();
 
-          var treelist =
-            '<ul class="fa-ul">' +
-            psdparse.createTreelist(psd.tree()) +
-            "</ul>";
-
-          console.log(treelist);
-
-          propertyDic["layer"] = treelist;
+          propertyDic["layer"] = treelistNew;
 
           // Fonts
-          propertyDic["fonts"] = psdparse.ctreatTextlist(psd.tree());
+
+          var fonts = obj["fonts"];
+          propertyDic["fonts"] = psdparse.createFontlist(fonts);
         } else if (creatorToolInfo.includes("Illustrator")) {
           console.log("This is illustrator File.");
 
