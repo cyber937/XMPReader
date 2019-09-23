@@ -114,9 +114,6 @@ ipcMain.on("open-file-dialog", event => {
           var treelistNew =
             '<ul class="fa-ul">' + psdparse.createLayerlist(layers) + "</ul>";
 
-          var psd = PSD.fromFile(filepath);
-          psd.parse();
-
           propertyDic["layer"] = treelistNew;
 
           // Fonts
