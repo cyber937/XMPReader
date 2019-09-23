@@ -5,7 +5,6 @@ const serializer = require("xmldom").XMLSerializer;
 const PSDParserAddon = require("./PSDParserAddon/build/Release/PSDParserAddon");
 const xmpaddon = require("./xmpaddon/build/Release/xmpaddon");
 var convert = require("xml-js");
-var PSD = require("psd");
 var psdparse = require("./src/PSDParse");
 
 let win;
